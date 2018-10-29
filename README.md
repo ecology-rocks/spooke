@@ -9,3 +9,7 @@ Enter Spooke. Spooke is, at its heart, simply a folder and document organizer. Y
 Spooke operates within a single document, but affects the contents of documents in a project folder. There's no weird, abitrary,  or secretive file format. Every chapter is a Google Doc, and they're all found in your "Spooke" folder, which will be directly in your drive. 
 
 Future updates of Spooke will include things like character templates, name generators, how-to advice, book stats, and compiling options. But for now, there's enough for you to get started writing your book! 
+
+## Where To Learn More
+
+You can visit https://samldavisphd.com/spooke to learn more about Spooke, or visit https://github.com/ecology-rocks/spooke to view the code repository.
