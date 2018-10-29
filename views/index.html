@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <base target="_top">
+    <!-- Add the Google Apps Script CSS file -->
+    <!--link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"-->
+    <!-- our friendly neighborhood bootstrap css -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css?family=Mali" rel="stylesheet">
+<style>
+.mali-font{
+font-family: 'Mali';
+font-weight: 600;
+text-shadow: 2px 2px #aaa;
+}
+</style>
+</head>
+
+<body>
+
+    <div class="container">
+    
+    
+    <div class="card bg-dark text-white text-center">
+    <img class="card-img-top" src="https://i.imgur.com/HafzkFy.png">
+      <!--h2 class="card-title text-center p-1">Welcome!</h2--> 
+      <div class="card-body">
+      
+      <div class="btn-group">
+       <a class="btn btn-warning small m-1" data-toggle="collapse" 
+       href="#about-collapse">About</a>
+       <a class="btn btn-warning m-1" data-toggle="collapse" 
+       href="#options-collapse">Options</a>
+       </div><!-- end button group -->
+       
+      <div class="m-1 p-1 collapse" id="about-collapse"> 
+      <small>
+      <p>Welcome to <?!= APP_NAME ?>. This app mimics the functionality
+       of Scrivener, Novlr, and other novel writing tools while allowing you to stay
+        within the power of Google Docs.</p>
+        <p>
+        This app can be opened in any document, but <span class="text-warning"><b>you should only use it in a 
+        "scratchpad" document</b></span> -- a document that doesn't contain important text. 
+        This app <span class="text-warning"><b>purposefully erases the open/active document regularly</b></span>, and saves
+        text to other project documents. <span class="text-warning"><b>Please do NOT use this app directly on files
+        saved in the <?!= APP_NAME ?> folder in your Drive</b></span>, as it may delete work
+        that is important to you. 
+        </p>
+        </small>
+        </div><!-- end about-collapse -->
+        
+       
+      <div class="m-1 p-1 collapse btn-group" id="options-collapse">
+      <a class="btn btn-info" onClick="google.script.run.askAuthorName(); return false;">Set Author Name</a>
+      </div>
+     
+       <p><small>Your current book is: <b><?!= GET_ACTIVE_PROJECT_NAME(); ?></b>.<br />
+       Your current pen name is: <b><?!= GET_AUTHOR_NAME(); ?></b>.<br />
+       Your current save-to location is: <b><?!= GET_ACTIVE_CHAPTER_NAME(); ?></b>.
+       </small></p>
+       
+       <a class="btn btn-info" onClick="google.script.run.openMainBar(); return false;">Refresh Bar</a>
+      <br><br>
+      
+      
+      <!-- start scratchpad menu -->
+      <div class="btn-group">
+      <a class="btn btn-info small text-light m-1" data-toggle="collapse" href="#scratchpad-menu">Scratchpad Menu</a>
+      </div>
+      
+      <!-- SCRATCHPAD MENU -->
+     <div class="card-body bg-light m-1 rounded" id="scratchpad-menu">
+      <div class="btn-group m-1">
+       <button class="btn btn-success" onClick="google.script.run.saveChapter(); return false;">Save Scratchpad</button>
+      </div>  
+      <div class="btn-group m-1">
+       <button class="btn btn-danger" onClick="google.script.run.clearDoc('<?!= DocumentApp.getActiveDocument().getId() ?>'); return false;">Clear Scratchpad</button>
+      </div>
+     </div>
+      
+      
+      <!-- BOOK MENU -->
+      <div class="btn-group">
+      <a class="btn btn-info small text-light m-1" data-toggle="collapse" href="#books-menu">Book Menu</a>
+      </div>
+      
+      <!-- NEW BOOK -->
+      <div class="card-body bg-light m-1 collapse rounded" id="books-menu">
+      <button class="btn btn-success small text-dark m-1" onClick="google.script.run.askNewProject()">New...</button>
+      
+      <!-- OPEN BOOK -->
+      <div class="dropdown m-1">
+      <button class="btn btn-warning dropdown-toggle m-1" type="button" 
+      id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+       Open... </button>
+     
+     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <? var projects = generateFolderTree(); 
+             projects.map(function(project){
+      ?>
+      <a class="dropdown-item" onClick="google.script.run.loadProject('<?!= project.id ?>'); return false;"><?!= project.name ?></a>
+      <?
+              });
+      ?>
+       </div><!-- end dropdown-menu-->
+       </div><!--end dropdown -->
+       
+      <!-- ARCHIVE BOOK --> 
+      <div class="dropdown m-1">
+      <button class="btn btn-danger dropdown-toggle m-1" type="button" 
+      id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+       Archive... </button>
+     
+     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <? var projects = generateFolderTree(); 
+             projects.map(function(project){
+      ?>
+      <a class="dropdown-item" onClick="google.script.run.archiveFolder('<?!= project.id ?>'); return false;"><?!= project.name ?></a>
+      <?
+              });
+      ?>
+       </div><!-- end dropdown-menu-->
+       </div><!--end dropdown -->
+       </div><!-- end btn-group -->
+       
+    
+       <!-- start chapter menu -->
+       
+       <div class="btn-group">
+      <a class="btn btn-info small text-light m-1" data-toggle="collapse" href="#chapter-menu">Chapter Menu</a>
+      </div> 
+
+      <!-- NEW CHAPTER -->
+      <div class="card-body bg-light m-1 collapse rounded" id="chapter-menu">
+      <button class="btn btn-success text-dark m-1" onClick="google.script.run.createChapter()">New...</button>
+      
+      <!-- OPEN CHAPTER -->
+       <div class="dropdown m-1">
+      <button class="btn btn-warning dropdown-toggle m-1" type="button" 
+      id="ddChapterButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+       Open... </button>
+     
+     <div class="dropdown-menu" aria-labelledby="ddChapterButton">
+     <a class="dropdown-item" onClick="google.script.run.createChapter(); return false;">New...</a>
+      <? var projects = generateFolderTree(); 
+         var chapters = generateDocTree(GET_ACTIVE_PROJECT_ID());
+             chapters.filter(function(project){return project.mime=="document"}).map(function(project){
+      ?>
+      <a class="dropdown-item" onClick="google.script.run.loadChapter('<?!= project.id ?>'); return false;"><?!= project.name ?></a>
+      <?
+              });
+      ?>
+       </div><!-- end dropdown-menu-->
+       </div><!--end dropdown -->
+       
+       <!-- ARCHIVE CHAPTER -->
+       <div class="dropdown m-1">
+      <button class="btn btn-danger dropdown-toggle m-1" type="button" 
+      id="ddChapterButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+       Archive... </button>
+     
+     <div class="dropdown-menu" aria-labelledby="ddChapterButton">
+      <? var projects = generateFolderTree(); 
+         var chapters = generateDocTree(GET_ACTIVE_PROJECT_ID());
+             chapters.filter(function(project){return project.mime=="document"}).map(function(project){
+      ?>
+      <a class="dropdown-item" onClick="google.script.run.archiveDoc('<?!= project.id ?>'); return false;"><?!= project.name ?></a>
+      <?
+              });
+      ?>
+       </div><!-- end dropdown-menu-->
+       </div><!--end dropdown -->
+      </div> <!-- end card-body -->
+      
+            
+      
+      </div> <!-- end card -->
+      
+                        
+                        
+     </div><!-- end container -->
+                  
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>
